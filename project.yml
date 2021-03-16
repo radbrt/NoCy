@@ -16,7 +16,7 @@ vars:
   gpu: 0
   spacy_version: ">=3.0.0"
 
-directories: ["assets", "corpus", "training", "metrics"]
+directories: ["assets", "corpus", "training", "metrics", "packages"]
 
 assets:
   - dest: "assets/${vars.dataset}"
@@ -74,8 +74,8 @@ commands:
   - name: package
     help: "package so it can be installed"
     script:
-      - "python -m spacy package training/${vars.dataset}/model-best packages --name ${vars.package_name} --version ${vars.package_version} --force"
+      - "python -m spacy package training/${vars.dataset}/model-best ./packages/ --name ${vars.package_name} --version ${vars.package_version} --force"
     deps:
-      - "packages/${vars.dataset}/model-best"
+      - "training/${vars.dataset}/model-best"
     outputs:
       - "packages/${vars.lang}_${vars.package_name}-${vars.package_version}/dist/en_${vars.package_name}-${vars.package_version}.tar.gz"

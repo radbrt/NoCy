@@ -2,8 +2,8 @@
 
 A simple transformer language model based on bert and tuned with the norwegian (bokmål) NorNE dataset.
 
-Due to its size, the not included but you can easily recreate it:
-- Create the folders `assets` and `packages`
+Due to its size the model is not included but you can easily recreate it:
+- Create the folders `packages` and `training`
 - Run `python -m spacy project run nocy_nb`
 
 
