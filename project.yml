@@ -1,0 +1,81 @@
+title: "Train Spacy transformer on Norne (nnb)"
+description: >
+  This project is a thin attempt at training a norwegian transformer language model based on norne. 
+  Shamelessly copied from https://github.com/KennethEnevoldsen/DaCy
+  Run with "python -m spacy project run nocy_nb"
+
+vars:
+  config: "config"
+  lang: "nb"
+  dataset: "norne"
+  train_name: "no_bokmaal-ud-train"
+  dev_name: "no_bokmaal-ud-dev"
+  test_name: "no_bokmaal-ud-test"
+  package_name: "nocy_nb_tft"
+  package_version: "0.0.0"
+  gpu: 0
+  spacy_version: ">=3.0.0"
+
+directories: ["assets", "corpus", "training", "metrics"]
+
+assets:
+  - dest: "assets/${vars.dataset}"
+
+workflows:
+
+  nocy_nb:
+    - convert
+    - train_nocy
+    - evaluate
+    - package
+
+commands:
+  - name: convert
+    help: "Convert conllu format to spacy"
+    script:
+      - "mkdir -p corpus/norne"
+      - "python -m spacy convert assets/${vars.dataset}/${vars.train_name}.conllu corpus/${vars.dataset} --converter conllu --merge-subtokens -n 10"
+      - "python -m spacy convert assets/${vars.dataset}/${vars.test_name}.conllu corpus/${vars.dataset} --converter conllu --merge-subtokens -n 10"
+      - "python -m spacy convert assets/${vars.dataset}/${vars.dev_name}.conllu corpus/${vars.dataset} --converter conllu --merge-subtokens -n 10"
+      - "mv corpus/${vars.dataset}/${vars.train_name}.spacy corpus/${vars.dataset}/train.spacy"
+      - "mv corpus/${vars.dataset}/${vars.test_name}.spacy corpus/${vars.dataset}/test.spacy"
+      - "mv corpus/${vars.dataset}/${vars.dev_name}.spacy corpus/${vars.dataset}/dev.spacy"
+    deps:
+      - "assets/${vars.dataset}/${vars.train_name}.conllu"
+      - "assets/${vars.dataset}/${vars.test_name}.conllu"
+      - "assets/${vars.dataset}/${vars.dev_name}.conllu"
+    outputs:
+      - "corpus/${vars.dataset}/train.spacy"
+      - "corpus/${vars.dataset}/test.spacy"
+      - "corpus/${vars.dataset}/dev.spacy"
+
+  - name: train_nocy
+    help: "Train model"
+    script:
+      - "python -m spacy train ${vars.config}.cfg --output training/${vars.dataset} --gpu-id ${vars.gpu} --paths.train corpus/${vars.dataset}/train.spacy --paths.dev corpus/${vars.dataset}/dev.spacy"
+    deps:
+      - "corpus/${vars.dataset}/train.spacy"
+      - "corpus/${vars.dataset}/dev.spacy"
+      - "${vars.config}.cfg"
+    outputs:
+      - "training/${vars.dataset}/model-best"
+
+
+  - name: evaluate
+    help: "Evaluate using the test dataset"
+    script: 
+      - "python -m spacy evaluate ./training/${vars.dataset}/model-best ./corpus/${vars.dataset}/test.spacy --output ./metrics/${vars.dataset}.json --gpu-id ${vars.gpu}"
+    deps:
+      - "training/${vars.dataset}/model-best"
+      - "corpus/${vars.dataset}/test.spacy"
+    outputs:
+      - "metrics/${vars.dataset}.json"
+
+  - name: package
+    help: "package so it can be installed"
+    script:
+      - "python -m spacy package training/${vars.dataset}/model-best packages --name ${vars.package_name} --version ${vars.package_version} --force"
+    deps:
+      - "packages/${vars.dataset}/model-best"
+    outputs:
+      - "packages/${vars.lang}_${vars.package_name}-${vars.package_version}/dist/en_${vars.package_name}-${vars.package_version}.tar.gz"
