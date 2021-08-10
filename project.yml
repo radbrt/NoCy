@@ -11,10 +11,10 @@ vars:
   train_name: "no_bokmaal-ud-train"
   dev_name: "no_bokmaal-ud-dev"
   test_name: "no_bokmaal-ud-test"
-  package_name: "nocy_nb_tft"
-  package_version: "0.0.0"
+  package_name: "nocy_trf"
+  package_version: "0.0.1"
   gpu: 0
-  spacy_version: ">=3.0.0"
+  spacy_version: ">=3.1.0"
 
 directories: ["assets", "corpus", "training", "metrics", "packages"]
 
@@ -74,7 +74,7 @@ commands:
   - name: package
     help: "package so it can be installed"
     script:
-      - "python -m spacy package training/${vars.dataset}/model-best ./packages/ --name ${vars.package_name} --version ${vars.package_version} --force"
+      - "python -m spacy package training/${vars.dataset}/model-best ./packages/ --name ${vars.package_name} --version ${vars.package_version} --force --build wheel"
     deps:
       - "training/${vars.dataset}/model-best"
     outputs:

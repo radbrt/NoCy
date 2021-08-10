@@ -4,3 +4,4 @@ corpus/*
 .idea
 _*
 *.lock
+base_config.cfg

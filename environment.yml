@@ -12,7 +12,6 @@ dependencies:
   - cudnn
   - cupy
   - requests
-  - spacy>=3.1.0
   - sqlite
   - srsly
   - thinc
@@ -21,13 +20,14 @@ dependencies:
   - pip:
     - conllu
     - pandas
-    - pip==21.0.1
+    - pip>=21.0.1
+    - spacy>=3.1
     - pillow
     - spacy-transformers
     - spacy-huggingface-hub
     - tokenizers
     - transformers
-    - torchvision==0.9.0+cu111
-    - torch==1.8.0+cu111
+    - torchvision>=0.9.0+cu111
+    - torch>=1.8.0+cu111
     - wheel
 prefix: /home/radbrt/anaconda3/envs/spacy
